@@ -1,0 +1,2 @@
+# openeq
+open source equalizer 
