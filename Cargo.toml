@@ -1,0 +1,43 @@
+[workspace]
+members = ["xtask"]
+resolver = "2"
+
+[package]
+name = "openeq"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.87"
+license = "MIT"
+description = "An open-source three-band stereo EQ plugin (VST3 and CLAP)."
+repository = "https://github.com/johnjackbogart/openeq"
+keywords = ["audio", "clap", "equalizer", "plugin", "vst3"]
+categories = ["multimedia::audio"]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+[profile.profiling]
+inherits = "release"
+debug = true
+strip = "none"
+
+[dependencies]
+egui = "=0.35.0"
+nice-plug = "0.2.3"
+nice-plug-egui = "0.3.0"
+
+# The native preview is deliberately a dev-only harness. The plugin editor itself is created by
+# nice-plug-egui; these two crates open the identical editor UI without a DAW host.
+[dev-dependencies]
+baseview = "0.2.2"
+egui-baseview = "0.6.0"
+
+# baseview's macOS hit-test override can recurse after AppKit KVO isa-swizzling. This small fork
+# dispatches directly to NSView instead. Keep this patch until the upstream release contains it.
+[patch.crates-io]
+baseview = { git = "https://github.com/Johnjackbogart/baseview", branch = "fix_hit_test" }
