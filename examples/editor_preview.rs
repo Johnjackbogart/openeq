@@ -43,6 +43,8 @@ impl KnobValue for MockKnobValue<'_> {
 }
 
 struct PreviewState {
+    #[cfg(debug_assertions)]
+    show_layout_debug: bool,
     low_frequency: f32,
     low_gain: f32,
     mid_frequency: f32,
@@ -55,6 +57,8 @@ struct PreviewState {
 impl Default for PreviewState {
     fn default() -> Self {
         Self {
+            #[cfg(debug_assertions)]
+            show_layout_debug: false,
             low_frequency: normalized(120.0, 40.0, 400.0),
             low_gain: normalized(0.0, -24.0, 24.0),
             mid_frequency: normalized(1_000.0, 200.0, 5_000.0),
@@ -100,8 +104,17 @@ fn main() {
         |_ctx: &Context, _commands: &mut ExtraOutputCommands, _state: &mut PreviewState| {},
         |_output: &FullOutput, _viewport_output: &ViewportOutput, _state: &mut PreviewState| {},
         |ui: &mut Ui, _commands: &mut ExtraOutputCommands, state: &mut PreviewState| {
+            #[cfg(debug_assertions)]
+            ui.ctx().all_styles_mut(|style| {
+                style.debug.debug_on_hover = state.show_layout_debug;
+                style.debug.show_interactive_widgets = state.show_layout_debug;
+                style.debug.show_widget_hits = state.show_layout_debug;
+            });
+
             let settings = state.settings();
             CentralPanel::default().show(ui, |ui| {
+                #[cfg(debug_assertions)]
+                ui.checkbox(&mut state.show_layout_debug, "Layout debug (hover)");
                 openeq::editor::build_ui(
                     ui,
                     settings,
@@ -110,50 +123,43 @@ fn main() {
                         normalized: &mut state.low_frequency,
                         default_normalized: normalized(120.0, 40.0, 400.0),
                         display: format_low_frequency,
-                    })
-                    .with_accent(egui::Color32::from_rgb(93, 167, 239)),
+                    }),
                     Knob::new(MockKnobValue {
                         name: "Low Gain",
                         normalized: &mut state.low_gain,
                         default_normalized: normalized(0.0, -24.0, 24.0),
                         display: format_gain,
-                    })
-                    .with_accent(egui::Color32::from_rgb(93, 167, 239)),
+                    }),
                     Knob::new(MockKnobValue {
                         name: "Mid Frequency",
                         normalized: &mut state.mid_frequency,
                         default_normalized: normalized(1_000.0, 200.0, 5_000.0),
                         display: format_mid_frequency,
-                    })
-                    .with_accent(egui::Color32::from_rgb(89, 198, 176)),
+                    }),
                     Knob::new(MockKnobValue {
                         name: "Mid Gain",
                         normalized: &mut state.mid_gain,
                         default_normalized: normalized(0.0, -24.0, 24.0),
                         display: format_gain,
-                    })
-                    .with_accent(egui::Color32::from_rgb(89, 198, 176)),
+                    }),
                     Knob::new(MockKnobValue {
                         name: "Mid Q",
                         normalized: &mut state.mid_q,
                         default_normalized: normalized(1.0, 0.3, 6.0),
                         display: format_q,
-                    })
-                    .with_accent(egui::Color32::from_rgb(89, 198, 176)),
+                    }),
                     Knob::new(MockKnobValue {
                         name: "High Frequency",
                         normalized: &mut state.high_frequency,
                         default_normalized: normalized(8_000.0, 2_000.0, 18_000.0),
                         display: format_high_frequency,
-                    })
-                    .with_accent(egui::Color32::from_rgb(244, 174, 92)),
+                    }),
                     Knob::new(MockKnobValue {
                         name: "High Gain",
                         normalized: &mut state.high_gain,
                         default_normalized: normalized(0.0, -24.0, 24.0),
                         display: format_gain,
-                    })
-                    .with_accent(egui::Color32::from_rgb(244, 174, 92)),
+                    }),
                 );
             });
         },

@@ -120,13 +120,10 @@ impl<V: KnobValue> egui::Widget for Knob<V> {
             let center = rect.center();
             let radius = rect.width() * 0.5;
             let normalized = self.value.normalized();
-            let visuals = ui.style().interact(&response);
             let track = egui::Stroke::new(3.0, ui.visuals().widgets.inactive.bg_fill);
-            let value_color = if response.hovered() {
-                visuals.fg_stroke.color
-            } else {
-                self.accent
-            };
+            // Keep the active arc tied to the band's accent in every interaction state. Using
+            // egui's hover foreground here would replace this color while dragging a knob.
+            let value_color = self.accent;
 
             painter.circle(
                 center,
